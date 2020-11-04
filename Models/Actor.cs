@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace kinopoisk2._0.Models
+namespace kinopoisk.Models
 {
     public class Actor
     {
@@ -13,9 +10,11 @@ namespace kinopoisk2._0.Models
         public string Bio { get; set; }
         public DateTime Birthday { get; set; }
         public List<MovieActors> Movies { get; set; }
+        public double Rating { get; set; }
         public Actor()
         {
             Movies = new List<MovieActors>();
+            Rating = 0;
 
         }
 
