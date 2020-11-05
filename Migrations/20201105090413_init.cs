@@ -40,18 +40,18 @@ namespace kinopoisk.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Persons",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true),
+                    Login = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Role = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Persons", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,7 +88,7 @@ namespace kinopoisk.Migrations
                 name: "MovieActors");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Persons");
 
             migrationBuilder.DropTable(
                 name: "Actors");

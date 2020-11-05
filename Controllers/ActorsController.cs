@@ -1,4 +1,5 @@
 ﻿using kinopoisk.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -62,6 +63,7 @@ namespace kinopoisk.Controllers
         // PUT: api/Actors/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> PutActor(int id, Actor actor)
         {
@@ -91,7 +93,42 @@ namespace kinopoisk.Controllers
             return NoContent();
         }
 
+        // PUT: api/Actors/5
+        [Authorize(Roles = "user")]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> AddRatingActor(int id)
+        {
+            Actor actor = await _context.Actors.FirstOrDefaultAsync(a => a.Id==id);
+            if (id != actor.Id)
+            {
+                return BadRequest();
+            }
 
+            actor.Rating += 1;
+            _context.Entry(actor).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ActorExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+
+        //PUT: api/Actors/1/Movie/2
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}/Movie/{MovieId}")]
         public async Task<IActionResult> AddMovie(int id, int MovieId)
         {
@@ -128,6 +165,7 @@ namespace kinopoisk.Controllers
         // POST: api/Actors
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<ActionResult<Actor>> PostActor(Actor actor)
         {
@@ -138,6 +176,7 @@ namespace kinopoisk.Controllers
         }
 
         // DELETE: api/Actors/5
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<Actor>> DeleteActor(int id)
         {

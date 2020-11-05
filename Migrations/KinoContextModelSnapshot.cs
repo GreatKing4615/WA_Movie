@@ -82,14 +82,14 @@ namespace kinopoisk.Migrations
                     b.ToTable("MovieActors");
                 });
 
-            modelBuilder.Entity("kinopoisk.Models.User", b =>
+            modelBuilder.Entity("kinopoisk.Models.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Login")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
@@ -100,7 +100,7 @@ namespace kinopoisk.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Persons");
                 });
 
             modelBuilder.Entity("kinopoisk.Models.MovieActors", b =>

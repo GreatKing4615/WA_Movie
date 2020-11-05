@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using kinopoisk;
-using kinopoisk.Models;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using kinopoisk.Models;
+using kinopoisk;
 
-namespace kinopoisk.Controllers
+namespace TokenApp.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController : Controller
     {
         private readonly KinoContext _context;
 
@@ -23,27 +18,13 @@ namespace kinopoisk.Controllers
         {
             _context = context;
         }
-
-        private ClaimsIdentity GetIdentity(string username, string password)
-        {
-            var person =  _context.Users.FirstOrDefault(x => x.Name == username && x.Password == password);
-            if (person != null)
-            {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, person.Name),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, person.Role)
-                };
-                ClaimsIdentity claimsIdentity =
-                new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
-                return claimsIdentity;
-            }
-
-            // если пользователя не найдено
-            return null;
-        }
-
+       
+        /// <summary>
+        /// Получение JWT-токена пользователя 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
         [HttpPost("/token")]
         public IActionResult Token(string username, string password)
         {
@@ -54,7 +35,7 @@ namespace kinopoisk.Controllers
             }
 
             var now = DateTime.UtcNow;
-            // JWT-токен
+            // создаем JWT-токен
             var jwt = new JwtSecurityToken(
                     issuer: AuthOptions.ISSUER,
                     audience: AuthOptions.AUDIENCE,
@@ -70,96 +51,33 @@ namespace kinopoisk.Controllers
                 username = identity.Name
             };
 
-            return Ok(response);
+            return Json(response);
         }
 
-
-
-
-        // GET: api/Account
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        /// <summary>
+        /// Сбор информации о пользователе
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        private ClaimsIdentity GetIdentity(string username, string password)
         {
-            return await _context.Users.ToListAsync();
-        }
-
-        // GET: api/Account/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            Person person = _context.Persons.FirstOrDefault(x => x.Login == username && x.Password == password);
+            if (person != null)
             {
-                return NotFound();
-            }
-
-            return user;
-        }
-
-        // PUT: api/Account/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
-        {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
+                var claims = new List<Claim>
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, person.Login),
+                    new Claim(ClaimsIdentity.DefaultRoleClaimType, person.Role)
+                };
+                ClaimsIdentity claimsIdentity =
+                new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
+                    ClaimsIdentity.DefaultRoleClaimType);
+                return claimsIdentity;
             }
 
-            return NoContent();
-        }
-
-        // POST: api/Account
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
-        }
-
-        // DELETE: api/Account/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<User>> DeleteUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return user;
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.Id == id);
+            // если пользователя не найдено
+            return null;
         }
     }
 }
